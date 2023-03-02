@@ -340,7 +340,7 @@ namespace ProtoBuf.Reflection
             var name = ctx.NameNormalizer.GetName(field);
             bool isOptional = field.label == FieldDescriptorProto.Label.LabelOptional;
             bool isRepeated = field.label == FieldDescriptorProto.Label.LabelRepeated;
-            var typeName = GetTypeName(ctx, field, out var dataFormat, out _, out _, out var isMap);
+            var typeName = GetTypeName(ctx, field, out var dataFormat, out _, out _, out var isMap, !isOptional);
             bool trackPresence = TrackFieldPresence(ctx, field, oneOfs, out _);
 
             string defaultValue = GetDefaultValue(ctx, field, typeName);
@@ -351,9 +351,9 @@ namespace ProtoBuf.Reflection
                 if (mapMsgType != null)
                 {
                     var keyTypeName = GetTypeName(ctx, mapMsgType.Fields.Single(x => x.Number == 1),
-                        out var keyDataFormat, out _, out _, out _);
+                        out var keyDataFormat, out _, out _, out _, true);
                     var valueTypeName = GetTypeName(ctx, mapMsgType.Fields.Single(x => x.Number == 2),
-                        out var valueDataFormat, out _, out _, out _);
+                        out var valueDataFormat, out _, out _, out _, true);
                     ctx.WriteLine($"{Escape(name)} = new global::System.Collections.Generic.Dictionary<{keyTypeName}, {valueTypeName}>();");
                 }
                 else if (ctx.RepeatedAsList || !UseArray(field))
@@ -464,7 +464,7 @@ namespace ProtoBuf.Reflection
             bool trackPresence = TrackFieldPresence(ctx, field, oneOfs, out var oneOf);
 
             bool suppressDefaultAttribute = !isOptional;
-            var typeName = GetTypeName(ctx, field, out var dataFormat, out var nullabilityType, out var compatibilityLevel, out var isMap);
+            var typeName = GetTypeName(ctx, field, out var dataFormat, out var nullabilityType, out var compatibilityLevel, out var isMap, !isOptional);
             string defaultValue = GetDefaultValue(ctx, field, typeName);
 
             WriteDataFormatAttribute();
@@ -526,9 +526,9 @@ namespace ProtoBuf.Reflection
                 if (mapMsgType != null)
                 {
                     var keyTypeName = GetTypeName(ctx, mapMsgType.Fields.Single(x => x.Number == 1),
-                        out var keyDataFormat, out _, out _, out var _);
+                        out var keyDataFormat, out _, out _, out var _, true);
                     var valueTypeName = GetTypeName(ctx, mapMsgType.Fields.Single(x => x.Number == 2),
-                        out var valueDataFormat, out _, out _, out var _);
+                        out var valueDataFormat, out _, out _, out var _, true);
 
                     bool first = true;
                     tw = ctx.Write($"[global::ProtoBuf.ProtoMap");
@@ -863,13 +863,13 @@ namespace ProtoBuf.Reflection
             return Escape(typeName);
         }
 
-        private string GetTypeName(GeneratorContext ctx, string typeName)
+        private string GetTypeName(GeneratorContext ctx, string typeName, bool nonNullable = false)
         {
             string dataFormat = "";
             NullabilityType? nullabilityType = null;
             CompatibilityLevel? compatibilityLevel = null;
             bool isMap = false;
-            return GetTypeName(ctx, null, typeName, ref dataFormat, ref nullabilityType, ref compatibilityLevel, ref isMap, false);
+            return GetTypeName(ctx, null, typeName, ref dataFormat, ref nullabilityType, ref compatibilityLevel, ref isMap, nonNullable);
         }
 
         private string GetTypeName(
