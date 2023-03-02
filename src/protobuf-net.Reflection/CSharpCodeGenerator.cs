@@ -338,7 +338,7 @@ namespace ProtoBuf.Reflection
         protected override void WriteInitField(GeneratorContext ctx, FieldDescriptorProto field, ref object state, OneOfStub[] oneOfs)
         {
             var name = ctx.NameNormalizer.GetName(field);
-            bool isOptional = field.label == FieldDescriptorProto.Label.LabelOptional;
+            bool isOptional = field.Proto3Optional;
             bool isRepeated = field.label == FieldDescriptorProto.Label.LabelRepeated;
             var typeName = GetTypeName(ctx, field, out var dataFormat, out _, out _, out var isMap, !isOptional);
             bool trackPresence = TrackFieldPresence(ctx, field, oneOfs, out _);
@@ -458,7 +458,7 @@ namespace ProtoBuf.Reflection
                 tw.Write(", DynamicType = true");
             }
 
-            bool isOptional = field.label == FieldDescriptorProto.Label.LabelOptional;
+            bool isOptional = field.Proto3Optional;
             bool isRepeated = field.label == FieldDescriptorProto.Label.LabelRepeated;
 
             bool trackPresence = TrackFieldPresence(ctx, field, oneOfs, out var oneOf);
