@@ -1275,5 +1275,31 @@ namespace ProtoBuf.Reflection
             }
             tw.WriteLine(");");
         }
+
+        protected override void WriteMediatrDeclaration(GeneratorContext ctx, ServiceDescriptorProto service, ref object state)
+        {
+            var access = GetAccess(GetAccess(service));
+            var serviceName = Escape(ctx.NameNormalizer.GetName(service));
+
+            foreach (var method in service.Methods)
+            {
+                //(method.ServerStreaming || method.ClientStreaming)
+                var inputType = GetTypeName(ctx, method.InputType);
+                var returnType = method.OutputType == WellKnownTypeEmpty ? null : GetTypeName(ctx, method.OutputType);
+                var methodName = ctx.NameNormalizer.GetName(method);
+
+                ctx.WriteLine($@"[global::ProtoBuf.ServiceModel.ProtoMediatrBehaviorAttribute(typeof({serviceName}), ""{methodName}"")]");
+
+                if (returnType is not null)
+                {
+                    ctx.WriteLine($@"{access} partial class {inputType} : global::MediatR.IRequest<{returnType}> {{ }}");
+                }
+                else
+                {
+                    ctx.WriteLine($@"{access} partial class {inputType} : global::MediatR.IRequest {{ }}");
+                }
+                ctx.WriteLine();
+            }
+        }
     }
 }

@@ -11,6 +11,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <DevelopmentDependency>true</DevelopmentDependency>
+	  <IsRoslynComponent>true</IsRoslynComponent>
+	  <LangVersion>10.0</LangVersion>
     <DefineConstants>$(DefineConstants);BUILD_TOOLS</DefineConstants>
   </PropertyGroup>
 

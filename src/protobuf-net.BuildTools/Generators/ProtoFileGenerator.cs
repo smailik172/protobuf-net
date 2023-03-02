@@ -21,6 +21,7 @@ namespace ProtoBuf.BuildTools.Generators
     [Generator]
     public sealed class ProtoFileGenerator : ISourceGenerator, ILoggingAnalyzer
     {
+        private DirectoryInfo? _solutionDirectory = Utils.TryGetSolutionDirectoryInfo();
         private event Action<string>? Log;
         event Action<string>? ILoggingAnalyzer.Log
         {
@@ -209,6 +210,7 @@ namespace ProtoBuf.BuildTools.Generators
                             AddOption(Literals.AdditionalFileMetadataPrefix + "CompatLevel", "compatlevel");
                             AddOption(Literals.AdditionalFileMetadataPrefix + "NullableValueType", "nullablevaluetype");
                             AddOption(Literals.AdditionalFileMetadataPrefix + "RepeatedAsList", "repeatedaslist");
+                            AddOption(Literals.AdditionalFileMetadataPrefix + "MediatR", "mediatr");
 
                             void AddOption(string readKey, string writeKey)
                             {
@@ -228,7 +230,9 @@ namespace ProtoBuf.BuildTools.Generators
                         }
 
                         var files = generator.Generate(set, options: options);
-                        var root = Directory.GetCurrentDirectory();
+                        //First() - is files root dir
+                        var fileDir = set.importPaths.First();
+                        var root = _solutionDirectory?.FullName ?? Directory.GetCurrentDirectory();
                         foreach (var file in files)
                         {
                             // not allowed to use path qualifiers
@@ -237,18 +241,18 @@ namespace ProtoBuf.BuildTools.Generators
 
                             // absolute path issue
                             // oh, you can specify any path, so ...
-                            var fullName = Path.GetFullPath(file.Name);
-                            var finalName =
+                            var prefix =
                             (
                                 // try to fix absolute path (if the file is in the project folder)
-                                fullName.StartsWith(root) ? fullName.Substring(root.Length) :
+                                fileDir.StartsWith(root) ? fileDir.Substring(root.Length) :
                                 // skip drive letter (windows fix)
-                                fullName.IndexOf(@":\") is var lpos && lpos != -1 ? fullName.Substring(lpos + 1) :
-                                // else
-                                fullName
+                                fileDir.IndexOf(@":\") is var lpos && lpos != -1 ? fileDir.Substring(lpos + 1) :
+                                                                // else
+                                String.Empty
                             )
                             // normalize name
                             .Replace(Path.DirectorySeparatorChar, '.').TrimStart('.');
+                            var finalName = $"{prefix}.{file.Name}";
 
                             // set 'generated' file extension prefix
                             finalName = Path.ChangeExtension(finalName, $"generated{Path.GetExtension(file.Name)}");

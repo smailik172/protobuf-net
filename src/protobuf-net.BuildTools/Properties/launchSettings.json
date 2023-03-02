@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "protobuf-net.BuildTools": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\..\\shared-contracts\\source\\ContractBuilder\\ServiceProtoContract.csproj"
+    }
+  }
+} 

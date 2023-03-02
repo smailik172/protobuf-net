@@ -25,9 +25,7 @@
     <PackageReference Include="System.Reflection.Emit" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\protobuf-net.Core\protobuf-net.Core.csproj" />
-  </ItemGroup>
+
 
   <ItemGroup>
 	  <None Include="Meta\MetaType.Nullability.cs">
